@@ -8,12 +8,12 @@
  * with MediaRecorder. What lands in the file is the animation exactly as
  * the browser rendered it, not a re-creation.
  *
- *   import { form } from "./generative-ui.js";
+ *   import { generateUI } from "./generative-ui.js";
  *   import { exportVideo } from "./generative-ui-record.js";
  *   await exportVideo({
  *     frame: stageEl,                       // a fixed-size frame holding only the UI (see 05-export.md)
  *     size: { w: 1920, h: 1080 },           // output pixels
- *     play: (delay) => form(cardEl, { mode: "texts", delay }).finished,
+ *     play: (delay) => generateUI(cardEl, { delay }).finished,
  *     filename: "card-16x9.mp4",
  *   });
  */
@@ -142,7 +142,7 @@ export function download(blob, name) {
 /**
  * Records `frame` while `play(lead)` runs: `lead` ms of the blank frame first,
  * the whole formation, then `hold` ms on the finished UI. `play` is called as
- * soon as recording starts and receives `lead` to pass as form()'s `delay`,
+ * soon as recording starts and receives `lead` to pass as generateUI()'s `delay`,
  * which hides the element at once, so the video opens on an empty frame. Downloads the file
  * when `filename` is given (the right extension is applied) and returns the Blob.
  * Call it from a click: browsers only allow capture after a user gesture.

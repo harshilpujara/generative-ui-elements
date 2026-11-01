@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
   <head>
-    <meta charset="ugu-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Generative UI Elements</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -178,8 +178,8 @@
     <header>
       <div class="logo serif">Generative UI<span>.</span></div>
       <div class="controls mono">
-        <button id="build">Build</button>
-        <button id="texts">Build + texts</button>
+        <button id="build">One card</button>
+        <button id="texts">Two cards</button>
         <button id="theme">Light</button>
         <button id="export">Export 16:9</button>
       </div>
@@ -221,7 +221,7 @@
     </div>
 
     <script type="module">
-      import { form } from "./generative-ui.js";
+      import { generateUI } from "./generative-ui.js";
       import { canRecord, exportVideo } from "./generative-ui-record.js";
 
       const cards = [document.getElementById("event"), document.getElementById("weather")];
@@ -230,22 +230,17 @@
         { comment: "attendance bars", selector: ".bars", vars: { "--bar-dur": "520ms", "--bar-stagger": "18ms", "--bar-ease": "cubic-bezier(0.16, 1, 0.3, 1)" } },
       ];
       let runs = [];
-      // Several cards: build only, staggered. One card: the texts fit beside it.
-      const play = (mode, delay = 0) => {
+      // One card: the log and code fit beside it. Two cards: no room, so just the cards, staggered.
+      const play = (one, delay = 0) => {
         runs.forEach((r) => r.cancel());
-        if (mode === "texts") {
-          cards[1].style.display = "none";
-          runs = [form(cards[0], { mode, recipes, title: "event", delay })];
-        } else {
-          cards[1].style.display = "";
-          runs = cards.map((c, i) => form(c, { delay: delay + i * 260 }));
-        }
+        cards[1].style.display = one ? "none" : "";
+        runs = one ? [generateUI(cards[0], { recipes, title: "event", delay })] : cards.map((c, i) => generateUI(c, { delay: delay + i * 260 }));
         return Promise.all(runs.map((r) => r.finished));
       };
 
-      document.fonts.ready.then(() => play("build"));
-      document.getElementById("build").onclick = () => play("build");
-      document.getElementById("texts").onclick = () => play("texts");
+      document.fonts.ready.then(() => play(true));
+      document.getElementById("build").onclick = () => play(true);
+      document.getElementById("texts").onclick = () => play(false);
       const themeBtn = document.getElementById("theme");
       themeBtn.onclick = () => {
         const light = document.documentElement.dataset.theme !== "light";
@@ -258,7 +253,7 @@
         exportVideo({
           frame: document.getElementById("stage"),
           size: { w: 1920, h: 1080 },
-          play: (delay) => play("build", delay),
+          play: (delay) => play(true, delay),
           filename: "generative-ui-16x9",
         }).catch((e) => alert(e.message));
     </script>

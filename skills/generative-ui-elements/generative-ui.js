@@ -2,8 +2,8 @@
  * generative-ui.js: plays a "UI forming from its blueprint" animation over any
  * element, then hands over to the real UI. No dependencies, any framework.
  *
- *   import { form } from "./generative-ui.js";
- *   await form(card, { mode: "texts" }).finished;
+ *   import { generateUI } from "./generative-ui.js";
+ *   await generateUI(card).finished;
  *
  * The drawing is measured from the element itself: every part is traced
  * where the real one will appear, then the real one is set in its place.
@@ -134,25 +134,29 @@ const codeLine = (l) => {
   return `<div>${esc(l)}</div>`;
 };
 
-/* ------------------------------------------------------------------ form */
+/* ------------------------------------------------------------ generateUI */
+
+// Effects started and not yet finished. The log and code only fit around one
+// element, so they show only when a single effect is playing.
+let playing = 0;
 
 /**
- * Plays one formation over `target`.
+ * Plays the generative UI effect over `target`: the blueprint, the skeleton,
+ * then the real UI. When there is room beside the element, the agent log and
+ * the motion code are written alongside it.
  *
- * options:
- *   mode     "build" (blueprint only, default) | "texts" (plus AGENT.LOG and MOTION.CSS)
- *   texts    where the texts go: "auto" (default) | "side" | "right" | "below"
- *   recipes  [{ comment, selector, vars: { "--name": "value" } }] shown in MOTION.CSS
- *   title    name for the motion code header
+ * options (all optional):
+ *   code     true (default): show the log and code where they fit; false: never
+ *   recipes  [{ comment, selector, vars: { "--name": "value" } }] typed as the motion code
+ *   title    name in the motion code header
  *   speed    1 = default; 0.75 slower, 1.25 faster
  *   delay    ms before starting (the element stays hidden meanwhile)
- *   labels   size labels on boxes (default true; turn off for whole screens)
- *   keepTexts keep the texts on screen after the build (default false: they fade with the blueprint)
+ *   labels   size labels on boxes (default true; false for whole screens)
  *
  * Returns { finished: Promise, skip(), cancel() }.
  */
-export function form(target, options = {}) {
-  const o = { mode: "build", texts: "auto", speed: 1, delay: 0, labels: true, keepTexts: false, ...options };
+export function generateUI(target, options = {}) {
+  const o = { code: true, speed: 1, delay: 0, labels: true, ...options };
   const k = 1 / (o.speed || 1);
   const reduced = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -165,6 +169,7 @@ export function form(target, options = {}) {
   let ended = false;
   const prevPos = target.style.position;
 
+  playing++;
   // Hide straight away, even during the delay, so the page never flashes the finished UI.
   target.classList.add("gu-root", "gu-building");
 
@@ -180,8 +185,9 @@ export function form(target, options = {}) {
   const finish = () => {
     if (ended) return;
     ended = true;
+    playing--;
     cleanup();
-    if (layer && !o.keepTexts) {
+    if (layer) {
       const l = layer;
       l.style.opacity = "0";
       setTimeout(() => {
@@ -277,19 +283,16 @@ export function form(target, options = {}) {
     let code = null;
     let lines = [];
     const rows = Math.max(6, Math.floor(m.h / 24) - 2);
-    if (o.mode === "texts") {
-      let where = o.texts;
-      if (where === "auto") {
-        const r = target.getBoundingClientRect();
-        where = innerWidth - r.right >= 400 && r.left >= 370 ? "side" : innerWidth - r.right >= 400 ? "right" : "below";
-      }
+    // The log goes left and the code right, only where the page has room for them.
+    const r = target.getBoundingClientRect();
+    const where = !o.code || playing > 1 ? null : innerWidth - r.right >= 400 && r.left >= 370 ? "side" : innerWidth - r.right >= 400 ? "right" : null;
+    if (where) {
       if (where === "side") {
         log = el("gu-panel gu-log", layer);
         log.style.right = "calc(100% + 56px)";
       }
       code = el("gu-panel gu-css", layer);
-      if (where === "below") Object.assign(code.style, { top: "calc(100% + 28px)", left: "0" });
-      else code.style.left = "calc(100% + 56px)";
+      code.style.left = "calc(100% + 56px)";
       lines = recipeLines(o.recipes, o.title, { step: stagger, fill: Math.round(TO_FILL * k), reveal: Math.round(TO_REVEAL * k), surface: Math.round(SURFACE_AT * k) });
     }
     const chars = lines.reduce((a, l) => a + l.length + 1, 0);
@@ -376,7 +379,7 @@ export function form(target, options = {}) {
           const tps = Math.round(140 + rand(Math.floor(t / 180)) * 40);
           code.innerHTML =
             `<div class="gu-panel-head">MOTION.CSS // ${pad(done, 2)} RECIPES · ${tokensDone}/${tokens} TOKENS</div><div class="gu-panel-rule"></div>` +
-            `<pre>${shown.slice(-(o.texts === "below" ? rows : 999)).map(codeLine).join("")}<span class="gu-caret"></span></pre>` +
+            `<pre>${shown.map(codeLine).join("")}<span class="gu-caret"></span></pre>` +
             `<div class="gu-status">${tps} TOK/S · ${shown.length} LN · ${lines.filter((l) => l === "}").length} RECIPES · <span class="${status === "APPLYING" ? "gu-c-acc" : ""}">${status}</span></div>`;
         }
       }
@@ -405,8 +408,8 @@ export function form(target, options = {}) {
 }
 
 /**
- * Attribute API. Plays each `[data-gu-form]` element once it scrolls into view.
- *   <div data-gu-form="texts" data-gu-delay="200">…</div>
+ * Attribute API. Plays each `[data-generative-ui]` element once it scrolls into view.
+ *   <div data-generative-ui data-generative-ui-delay="200">…</div>
  */
 export function auto(root = document) {
   const io = new IntersectionObserver(
@@ -415,12 +418,12 @@ export function auto(root = document) {
         if (!e.isIntersecting) continue;
         io.unobserve(e.target);
         const d = e.target.dataset;
-        form(e.target, { mode: d.guForm === "texts" ? "texts" : "build", delay: Number(d.guDelay) || 0 });
+        generateUI(e.target, { delay: Number(d.generativeUiDelay) || 0 });
       }
     },
     { threshold: 0.35 },
   );
-  root.querySelectorAll("[data-gu-form]").forEach((n) => {
+  root.querySelectorAll("[data-generative-ui]").forEach((n) => {
     n.classList.add("gu-root", "gu-building"); // hidden until it plays
     io.observe(n);
   });
