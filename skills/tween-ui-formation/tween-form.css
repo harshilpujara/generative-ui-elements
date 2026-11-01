@@ -1,0 +1,245 @@
+/*
+ * tween-form.css: styles for the formation runtime (tween-form.js).
+ * Import once, globally. Colours follow the text colour of wherever the
+ * element sits, so the blueprint works on dark and light pages unchanged.
+ * Override the --tf-* variables on any ancestor to retune it.
+ */
+
+:root {
+  --tf-accent: #ff5a1f; /* the one signal colour: halftone, progress, "APPLYING" */
+  --tf-ok: #7fd18b; /* finished rows in the agent log */
+  --tf-code: #8e9dff; /* values in the motion code */
+  --tf-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --tf-ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+[data-theme="light"] {
+  --tf-ok: #2f9e44;
+  --tf-code: #4a5cff;
+}
+
+/* ---- Parts: absent until the blueprint resolves them, then set in a few hard steps ---- */
+
+.tf-building [data-tf-part] {
+  opacity: 0;
+  transition:
+    opacity 0.18s steps(3, end),
+    clip-path 0.36s steps(6, end);
+}
+.tf-building [data-tf-part="text"] {
+  clip-path: inset(0 100% 0 0);
+}
+.tf-building [data-tf-part].tf-on {
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+}
+/* The surface itself waits too: no fill, no shadow, until the structure is in. */
+.tf-building.tf-root:not(.tf-surfaced) {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+.tf-building.tf-root {
+  transition:
+    background-color 0.3s steps(4, end),
+    box-shadow 0.3s steps(4, end),
+    border-color 0.3s steps(4, end);
+}
+
+/* ---- The construction layer ---- */
+
+.tf-layer {
+  position: absolute;
+  z-index: 30;
+  pointer-events: none;
+  font-family: var(--tf-mono);
+  color: inherit;
+  --tf-ink: currentColor;
+  --tf-line: color-mix(in srgb, currentColor 55%, transparent);
+  --tf-soft: color-mix(in srgb, currentColor 25%, transparent);
+  --tf-faint: color-mix(in srgb, currentColor 38%, transparent);
+  --tf-muted: color-mix(in srgb, currentColor 60%, transparent);
+  transition: opacity 0.2s;
+}
+.tf-layer * {
+  box-sizing: border-box;
+}
+.tf-abs {
+  position: absolute;
+}
+.tf-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, color-mix(in srgb, currentColor 22%, transparent) 1px, transparent 1.3px);
+  background-size: 14px 14px;
+  background-position: 7px 7px;
+}
+.tf-guide-h {
+  position: absolute;
+  left: -64px;
+  right: -64px;
+  border-top: 1px dotted var(--tf-soft);
+}
+.tf-guide-v {
+  position: absolute;
+  top: -64px;
+  bottom: -64px;
+  border-left: 1px dotted var(--tf-soft);
+}
+.tf-handle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border: 1px solid var(--tf-line);
+  background: var(--tf-handle-bg, Canvas);
+}
+.tf-size {
+  position: absolute;
+  top: -28px;
+  left: 0;
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--tf-muted);
+}
+.tf-size i {
+  font-style: normal;
+  color: var(--tf-faint);
+}
+/* Text: a dotted rule with end points, then the slot set in # marks. */
+.tf-rule {
+  position: absolute;
+  height: 2px;
+  background-image: radial-gradient(circle, color-mix(in srgb, currentColor 60%, transparent) 1px, transparent 1.2px);
+  background-size: 6px 2px;
+}
+.tf-rule::before,
+.tf-rule::after {
+  content: "";
+  position: absolute;
+  top: -2.5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: color-mix(in srgb, currentColor 80%, transparent);
+}
+.tf-rule::before {
+  left: -4px;
+}
+.tf-rule::after {
+  right: -4px;
+}
+.tf-hash {
+  position: absolute;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 1;
+  color: var(--tf-faint);
+}
+/* Boxes: a dashed outline with its size, then a faint slot naming the element. */
+.tf-box {
+  position: absolute;
+  border: 1px dashed var(--tf-line);
+  border-radius: 5px;
+}
+.tf-box.tf-round {
+  border-radius: 50%;
+}
+.tf-box.tf-fill {
+  border-color: var(--tf-soft);
+}
+.tf-box > b {
+  position: absolute;
+  top: -15px;
+  left: 0;
+  font-size: 9.5px;
+  font-weight: 400;
+  white-space: nowrap;
+  color: var(--tf-muted);
+}
+.tf-box > em {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 9.5px;
+  font-style: normal;
+  color: var(--tf-faint);
+}
+
+/* ---- Generation texts: AGENT.LOG and MOTION.CSS ---- */
+
+.tf-panel {
+  position: absolute;
+  top: 0;
+  font-size: 10.5px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.tf-panel-head {
+  letter-spacing: 0.04em;
+}
+.tf-panel-rule {
+  margin: 6px 0;
+  border-top: 1px dotted var(--tf-faint);
+}
+.tf-log {
+  width: 300px;
+}
+.tf-log .tf-panel-head {
+  text-align: right;
+}
+.tf-log-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 62px 52px 58px;
+  gap: 6px;
+}
+.tf-log-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tf-css {
+  width: 330px;
+}
+.tf-css pre {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+}
+.tf-c-note,
+.tf-dim {
+  color: var(--tf-faint);
+}
+.tf-c-val {
+  color: var(--tf-code);
+}
+.tf-c-acc {
+  color: var(--tf-accent);
+}
+.tf-c-ok {
+  color: var(--tf-ok);
+}
+.tf-caret {
+  display: inline-block;
+  width: 6px;
+  height: 12px;
+  transform: translateY(2px);
+  background: color-mix(in srgb, currentColor 80%, transparent);
+  animation: tf-blink 1s steps(1) infinite;
+}
+.tf-status {
+  margin-top: 12px;
+  color: var(--tf-muted);
+  letter-spacing: 0.04em;
+}
+@keyframes tf-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-building [data-tf-part] {
+    transition-duration: 0.01ms;
+  }
+}
