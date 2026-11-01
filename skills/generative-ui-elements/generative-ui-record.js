@@ -1,5 +1,5 @@
 /**
- * tween-record.js: records one element of the page to a video file, so a
+ * generative-ui-record.js: records one element of the page to a video file, so a
  * formation can be exported as MP4 (or WebM where MP4 can't be encoded).
  *
  * The tab is captured with getDisplayMedia, cropped to the element (Region
@@ -8,8 +8,8 @@
  * with MediaRecorder. What lands in the file is the animation exactly as
  * the browser rendered it, not a re-creation.
  *
- *   import { form } from "./tween-form.js";
- *   import { exportVideo } from "./tween-record.js";
+ *   import { form } from "./generative-ui.js";
+ *   import { exportVideo } from "./generative-ui-record.js";
  *   await exportVideo({
  *     frame: stageEl,                       // a fixed-size frame holding only the UI (see 05-export.md)
  *     size: { w: 1920, h: 1080 },           // output pixels

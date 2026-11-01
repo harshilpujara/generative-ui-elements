@@ -1,6 +1,6 @@
 # Export: record the formation as a video
 
-`tween-record.js` records the formation exactly as the browser renders it, cropped to a frame that holds only the UI, at a fixed output size. No screen-recording app, no editor chrome, no cursor.
+`generative-ui-record.js` records the formation exactly as the browser renders it, cropped to a frame that holds only the UI, at a fixed output size. No screen-recording app, no editor chrome, no cursor.
 
 ## 1. Build an export frame
 
@@ -28,8 +28,8 @@ A dedicated layer, separate from your editor or page UI:
 ## 2. Record
 
 ```js
-import { form } from "./tween-form.js";
-import { canRecord, exportVideo } from "./tween-record.js";
+import { form } from "./generative-ui.js";
+import { canRecord, exportVideo } from "./generative-ui-record.js";
 
 button.disabled = !canRecord();
 button.onclick = () =>

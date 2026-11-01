@@ -26,7 +26,7 @@ MOTION.CSS // 01 RECIPES · 5/10 TOKENS
 158 TOK/S · 11 LN · 3 RECIPES · WRITING
 ```
 
-The recipes are typed character by character with a blinking caret, between 250ms and the end of the build. The status line reads `READING` → `WRITING` → `APPLYING`. Values are coloured with `--tf-code`, comments are faint.
+The recipes are typed character by character with a blinking caret, between 250ms and the end of the build. The status line reads `READING` → `WRITING` → `APPLYING`. Values are coloured with `--gu-code`, comments are faint.
 
 Pass `recipes` so these are the values your UI really uses ([04-recipes.md](./04-recipes.md)). Without them the panel types the formation's own timings, which is still true, just less interesting.
 

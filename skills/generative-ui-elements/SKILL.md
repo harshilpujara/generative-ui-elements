@@ -1,14 +1,14 @@
 ---
-name: tween-ui-formation
+name: generative-ui-elements
 license: MIT (see LICENSE.txt)
-description: Make any card, panel or full screen form on the page as if an agent were building it, then hand over to the real UI. The UI is measured from its own DOM, traced part by part over a dotted blueprint (grid, guides, corner handles, size labels, a halftone sweep, dotted rules for text, dashed boxes for frames, buttons and icons), filled in as a skeleton (# marks, <button> slots) and set for real in hard steps. Two modes, build (the blueprint only) and texts (plus a live AGENT.LOG of every part and the MOTION.CSS being typed beside it). Includes a video exporter that records the formation itself to MP4/WebM with no page chrome, for posts and launch videos. One dependency-free runtime for any framework (vanilla, React, Next.js, Vue, Svelte). Use when the user asks for a "UI formation", "blueprint reveal", "build-in animation", "UI being generated", "agent building the UI", "wireframe to UI", "skeleton that turns into the real UI", "code typing beside the UI", "agent log animation", "generative UI reveal", "export the animation as a video", or the commands tween form, tween form texts, tween form export and tween form preview.
+description: Make any card, panel or full screen form on the page as if an agent were building it, then hand over to the real UI. The UI is measured from its own DOM, traced part by part over a dotted blueprint (grid, guides, corner handles, size labels, a halftone sweep, dotted rules for text, dashed boxes for frames, buttons and icons), filled in as a skeleton (# marks, <button> slots) and set for real in hard steps. Two modes, build (the blueprint only) and texts (plus a live AGENT.LOG of every part and the MOTION.CSS being typed beside it). Includes a video exporter that records the formation itself to MP4/WebM with no page chrome, for posts and launch videos. One dependency-free runtime for any framework (vanilla, React, Next.js, Vue, Svelte). Use when the user asks for a "UI formation", "blueprint reveal", "build-in animation", "UI being generated", "agent building the UI", "wireframe to UI", "skeleton that turns into the real UI", "code typing beside the UI", "agent log animation", "generative UI reveal", "export the animation as a video", or the commands gen ui, gen ui texts, gen ui export and gen ui preview.
 ---
 
-# tween · UI formation
+# Generative UI Elements
 
 Plays a "this UI is being built" animation over any element, then shows the real thing. Nothing is faked: every outline, text rule and slot is measured from the element, so the blueprint lands exactly where the real parts appear, and the real parts replace it one by one.
 
-Built for tween, a transitions lab, and shared at [harshilpujara/generative-ui-elements](https://github.com/harshilpujara/generative-ui-elements). This folder is the whole workflow, packaged so you can run it on your own UI.
+Shared at [harshilpujara/generative-ui-elements](https://github.com/harshilpujara/generative-ui-elements). This folder is the whole workflow, packaged so you can run it on your own UI.
 
 ## What one formation draws
 
@@ -46,32 +46,32 @@ Where the texts go (`texts` option): `"auto"` (default; both sides if there's ro
 
 ## Commands
 
-### tween form
+### gen ui
 
-Trigger phrases: `tween form`, "make this build like an agent made it", "add the formation", "blueprint reveal on this".
+Trigger phrases: `gen ui`, "make this build like an agent made it", "add the formation", "blueprint reveal on this".
 
 1. Find the element: the one named, the component in the open file, or ask.
 2. Pick the mode (default `build`) and the trigger: on mount, when data arrives, on scroll into view, or on a button.
 3. Propose it in one line, e.g. "I'd play **build** on `<ResultCard>` when the response arrives, with `data-part` marks on its title, chart and buttons. OK?"
 4. On confirmation: install (below), mark the parts ([01-marking-parts.md](./01-marking-parts.md)), wire it. Keep the diff small.
 
-### tween form texts
+### gen ui texts
 
-Same as `tween form` with `mode: "texts"`. Pass the component's real motion values as `recipes` ([04-recipes.md](./04-recipes.md)) so the code on screen is the code the UI runs. Mention the texts need empty space beside the element.
+Same as `gen ui` with `mode: "texts"`. Pass the component's real motion values as `recipes` ([04-recipes.md](./04-recipes.md)) so the code on screen is the code the UI runs. Mention the texts need empty space beside the element.
 
-### tween form export
+### gen ui export
 
 Add a video export of the formation: a fixed-size frame holding only the UI, an aspect ratio (16:9, 1:1, 4:5, 9:16), a theme, then `exportVideo()`. See [05-export.md](./05-export.md).
 
-### tween form preview
+### gen ui preview
 
 Serve this folder (`npx serve .` or `python3 -m http.server`) and open [`demo.html`](./demo.html): two cards (one marked with `data-part`, one detected automatically), Build, Build + texts, a light/dark switch and Export 16:9.
 
 ## Install
 
-1. Copy [`tween-form.js`](./tween-form.js) and [`tween-form.css`](./tween-form.css) into the project (e.g. `src/lib/`). Add [`tween-record.js`](./tween-record.js) for video export. No dependencies.
+1. Copy [`generative-ui.js`](./generative-ui.js) and [`generative-ui.css`](./generative-ui.css) into the project (e.g. `src/lib/`). Add [`generative-ui-record.js`](./generative-ui-record.js) for video export. No dependencies.
 2. Import the CSS once, globally.
-3. Optional: load DM Mono for the blueprint labels (`--tf-mono` falls back to the system monospace).
+3. Optional: load DM Mono for the blueprint labels (`--gu-mono` falls back to the system monospace).
 
 Don't rewrite the timings. They're tuned together (trace → skeleton → set, the stagger, the halftone, the surface moment). Use `speed` to make it faster or slower.
 
@@ -82,7 +82,7 @@ Call `form` **after the element has rendered at its final size**, with fonts loa
 **Vanilla**
 
 ```js
-import { form } from "./tween-form.js";
+import { form } from "./generative-ui.js";
 await document.fonts.ready;
 await form(document.querySelector("#result"), { mode: "texts" }).finished;
 ```
@@ -90,9 +90,9 @@ await form(document.querySelector("#result"), { mode: "texts" }).finished;
 **Attribute API** (plays when scrolled into view)
 
 ```html
-<section data-tf-form="texts" data-tf-delay="200">…</section>
+<section data-gu-form="texts" data-gu-delay="200">…</section>
 <script type="module">
-  import { auto } from "./tween-form.js";
+  import { auto } from "./generative-ui.js";
   auto();
 </script>
 ```
@@ -102,7 +102,7 @@ await form(document.querySelector("#result"), { mode: "texts" }).finished;
 ```jsx
 "use client";
 import { useLayoutEffect, useRef } from "react";
-import { form } from "@/lib/tween-form.js";
+import { form } from "@/lib/generative-ui.js";
 
 export function FormedCard({ data }) {
   const ref = useRef(null);
@@ -132,7 +132,7 @@ onBeforeUnmount(() => run?.cancel());
 ```svelte
 <script>
   import { onMount } from "svelte";
-  import { form } from "$lib/tween-form.js";
+  import { form } from "$lib/generative-ui.js";
   let el;
   onMount(() => form(el).cancel);
 </script>
@@ -158,7 +158,7 @@ onBeforeUnmount(() => run?.cancel());
 
 ## Theming
 
-The blueprint is drawn in the text colour of wherever the element sits, so it works on dark and light pages as is. Retune with `--tf-accent` (halftone, in-progress bars, `APPLYING`), `--tf-ok`, `--tf-code` and `--tf-mono` on any ancestor. A light/dark switch only has to flip your own tokens; see [06-design.md](./06-design.md) for the full visual language.
+The blueprint is drawn in the text colour of wherever the element sits, so it works on dark and light pages as is. Retune with `--gu-accent` (halftone, in-progress bars, `APPLYING`), `--gu-ok`, `--gu-code` and `--gu-mono` on any ancestor. A light/dark switch only has to flip your own tokens; see [06-design.md](./06-design.md) for the full visual language.
 
 ## Gotchas
 

@@ -1,8 +1,8 @@
 /**
- * tween-form.js: plays a "UI forming from its blueprint" animation over any
+ * generative-ui.js: plays a "UI forming from its blueprint" animation over any
  * element, then hands over to the real UI. No dependencies, any framework.
  *
- *   import { form } from "./tween-form.js";
+ *   import { form } from "./generative-ui.js";
  *   await form(card, { mode: "texts" }).finished;
  *
  * The drawing is measured from the element itself: every part is traced
@@ -52,7 +52,7 @@ function findParts(root) {
   const out = [];
   const walk = (n) => {
     for (const c of n.children) {
-      if (c.closest("[data-tf-skip]") || c.classList.contains("tf-layer")) continue;
+      if (c.closest("[data-gu-skip]") || c.classList.contains("gu-layer")) continue;
       const r = c.getBoundingClientRect();
       if (r.width < 2 || r.height < 2) continue;
       const tag = c.tagName.toLowerCase();
@@ -128,9 +128,9 @@ function recipeLines(recipes, title, timing) {
 }
 
 const codeLine = (l) => {
-  if (l.startsWith("/*")) return `<div class="tf-c-note">${esc(l)}</div>`;
+  if (l.startsWith("/*")) return `<div class="gu-c-note">${esc(l)}</div>`;
   const i = l.indexOf(":");
-  if (i > 0 && l.startsWith("  ")) return `<div>${esc(l.slice(0, i + 1))}<span class="tf-c-val">${esc(l.slice(i + 1))}</span></div>`;
+  if (i > 0 && l.startsWith("  ")) return `<div>${esc(l.slice(0, i + 1))}<span class="gu-c-val">${esc(l.slice(i + 1))}</span></div>`;
   return `<div>${esc(l)}</div>`;
 };
 
@@ -166,15 +166,15 @@ export function form(target, options = {}) {
   const prevPos = target.style.position;
 
   // Hide straight away, even during the delay, so the page never flashes the finished UI.
-  target.classList.add("tf-root", "tf-building");
+  target.classList.add("gu-root", "gu-building");
 
   const cleanup = () => {
     cancelAnimationFrame(raf);
     clearTimeout(timer);
-    target.classList.remove("tf-building", "tf-surfaced", "tf-root");
-    target.querySelectorAll("[data-tf-part]").forEach((n) => {
-      n.classList.remove("tf-on");
-      delete n.dataset.tfPart;
+    target.classList.remove("gu-building", "gu-surfaced", "gu-root");
+    target.querySelectorAll("[data-gu-part]").forEach((n) => {
+      n.classList.remove("gu-on");
+      delete n.dataset.guPart;
     });
   };
   const finish = () => {
@@ -195,13 +195,13 @@ export function form(target, options = {}) {
   const start = () => {
     if (ended) return;
     if (reduced) {
-      target.classList.remove("tf-building");
+      target.classList.remove("gu-building");
       target.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
       return finish();
     }
     const m = measure(target);
     const n = m.parts.length;
-    m.parts.forEach((p) => (p.n.dataset.tfPart = p.type));
+    m.parts.forEach((p) => (p.n.dataset.guPart = p.type));
     const stagger = Math.min(MAX_STEP, SPREAD / Math.max(1, n)) * k;
     const times = m.parts.map((_, i) => {
       const scan = START * k + i * stagger;
@@ -210,7 +210,7 @@ export function form(target, options = {}) {
     const total = n ? times[n - 1].reveal + TAIL * k : 1200 * k;
 
     /* The layer sits beside the element, at its exact box, so guides can run past its edges. */
-    layer = el("tf-layer");
+    layer = el("gu-layer");
     layer.setAttribute("aria-hidden", "true");
     Object.assign(layer.style, { left: `${target.offsetLeft}px`, top: `${target.offsetTop}px`, width: `${m.w}px`, height: `${m.h}px` });
     // The parent must contain an absolutely positioned layer at the element's offsets.
@@ -225,18 +225,18 @@ export function form(target, options = {}) {
     const cs = getComputedStyle(target);
     const radius = cs.borderTopLeftRadius || "0px";
     // Handles sit on the page background colour.
-    layer.style.setProperty("--tf-handle-bg", getComputedStyle(document.body).backgroundColor || "Canvas");
+    layer.style.setProperty("--gu-handle-bg", getComputedStyle(document.body).backgroundColor || "Canvas");
 
-    const guides = [0, m.h].map((y) => Object.assign(el("tf-guide-h", layer).style, { top: `${y}px` }));
-    guides.push(...[0, m.w].map((x) => Object.assign(el("tf-guide-v", layer).style, { left: `${x}px` })));
-    const grid = el("tf-grid", layer);
+    const guides = [0, m.h].map((y) => Object.assign(el("gu-guide-h", layer).style, { top: `${y}px` }));
+    guides.push(...[0, m.w].map((x) => Object.assign(el("gu-guide-v", layer).style, { left: `${x}px` })));
+    const grid = el("gu-grid", layer);
     grid.style.borderRadius = radius;
-    const dither = el("tf-abs", layer, "canvas");
+    const dither = el("gu-abs", layer, "canvas");
     dither.width = Math.round(m.w);
     dither.height = Math.round(m.h);
     Object.assign(dither.style, { left: "0", top: "0", width: `${m.w}px`, height: `${m.h}px` });
     const dctx = dither.getContext("2d");
-    const accent = getComputedStyle(layer).getPropertyValue("--tf-accent").trim() || "#ff5a1f";
+    const accent = getComputedStyle(layer).getPropertyValue("--gu-accent").trim() || "#ff5a1f";
     const ns = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(ns, "svg");
     svg.setAttribute("width", m.w);
@@ -249,22 +249,22 @@ export function form(target, options = {}) {
       [m.w, 0],
       [0, m.h],
       [m.w, m.h],
-    ].map(([x, y]) => Object.assign(el("tf-handle", layer).style, { left: `${x}px`, top: `${y}px` }));
-    const size = el("tf-size", layer);
+    ].map(([x, y]) => Object.assign(el("gu-handle", layer).style, { left: `${x}px`, top: `${y}px` }));
+    const size = el("gu-size", layer);
 
     /* One pair of nodes per part: the trace, then the skeleton. */
     const contains = (a, c) => a !== c && c.type !== "text" && c.x >= a.x - 1 && c.y >= a.y - 1 && c.x + c.w <= a.x + a.w + 1 && c.y + c.h <= a.y + a.h + 1;
     const nodes = m.parts.map((p) => {
       if (p.type === "text") {
-        const rule = el("tf-rule", layer);
+        const rule = el("gu-rule", layer);
         Object.assign(rule.style, { left: `${p.x}px`, top: `${p.y + p.h / 2 - 1}px`, width: `${p.w}px`, display: "none" });
         const fs = Math.max(8, Math.min(14, p.h * 0.62));
-        const hash = el("tf-hash", layer);
+        const hash = el("gu-hash", layer);
         hash.textContent = "#".repeat(Math.max(2, Math.floor(p.w / (fs * 0.62))));
         Object.assign(hash.style, { left: `${p.x}px`, top: `${p.y + (p.h - fs) / 2}px`, width: `${p.w}px`, fontSize: `${fs}px`, display: "none" });
         return { a: rule, b: hash };
       }
-      const box = el(`tf-box${p.type === "svg" ? " tf-round" : ""}`, layer);
+      const box = el(`gu-box${p.type === "svg" ? " gu-round" : ""}`, layer);
       Object.assign(box.style, { left: `${p.x - 2}px`, top: `${p.y - 2}px`, width: `${p.w + 4}px`, height: `${p.h + 4}px`, display: "none" });
       if (o.labels && p.type !== "svg" && p.w > 44 && !m.parts.some((q) => contains(p, q))) el("", box, "b").textContent = `${Math.round(p.w)} × ${Math.round(p.h)}`;
       const slot = p.h > 18 && p.w > 40 ? el("", null, "em") : null;
@@ -284,10 +284,10 @@ export function form(target, options = {}) {
         where = innerWidth - r.right >= 400 && r.left >= 370 ? "side" : innerWidth - r.right >= 400 ? "right" : "below";
       }
       if (where === "side") {
-        log = el("tf-panel tf-log", layer);
+        log = el("gu-panel gu-log", layer);
         log.style.right = "calc(100% + 56px)";
       }
-      code = el("tf-panel tf-css", layer);
+      code = el("gu-panel gu-css", layer);
       if (where === "below") Object.assign(code.style, { top: "calc(100% + 28px)", left: "0" });
       else code.style.left = "calc(100% + 56px)";
       lines = recipeLines(o.recipes, o.title, { step: stagger, fill: Math.round(TO_FILL * k), reveal: Math.round(TO_REVEAL * k), surface: Math.round(SURFACE_AT * k) });
@@ -300,14 +300,14 @@ export function form(target, options = {}) {
 
     const frame = (now) => {
       const t = now - t0;
-      if (t >= SURFACE_AT * k) target.classList.add("tf-surfaced");
+      if (t >= SURFACE_AT * k) target.classList.add("gu-surfaced");
       let revealed = 0;
       times.forEach((tm, i) => {
         if (t >= tm.reveal) {
           revealed++;
           if (!on.has(i)) {
             on.add(i);
-            m.parts[i].n.classList.add("tf-on");
+            m.parts[i].n.classList.add("gu-on");
           }
         }
         const nd = nodes[i];
@@ -315,7 +315,7 @@ export function form(target, options = {}) {
         const filling = t >= tm.fill;
         if (nd.a === nd.b) {
           nd.a.style.display = live ? "" : "none";
-          nd.a.classList.toggle("tf-fill", filling);
+          nd.a.classList.toggle("gu-fill", filling);
           if (nd.slot && filling && !nd.slot.parentNode) nd.a.appendChild(nd.slot);
         } else {
           nd.a.style.display = live && !filling ? "" : "none";
@@ -349,12 +349,12 @@ export function form(target, options = {}) {
       if (log) {
         const pending = times.findIndex((x) => t < x.scan);
         const upto = pending === -1 ? n : pending;
-        let html = `<div class="tf-panel-head">AGENT.LOG // PARTS ${pad(revealed, 2)}/${pad(n, 2)}</div><div class="tf-panel-rule"></div>`;
+        let html = `<div class="gu-panel-head">AGENT.LOG // PARTS ${pad(revealed, 2)}/${pad(n, 2)}</div><div class="gu-panel-rule"></div>`;
         for (let i = Math.max(0, upto - rows); i < upto; i++) {
           const p = m.parts[i];
           const pr = clamp((t - times[i].scan) / (times[i].reveal - times[i].scan));
           const bar = pr >= 1 ? "[  ok  ]" : `[${"#".repeat(Math.round(pr * 6)).padEnd(6, ".")}]`;
-          html += `<div class="tf-log-row"><span class="tf-dim">0x${Math.floor(rand(i + 31) * 0xffff).toString(16).padStart(4, "0")}</span><span>${esc(p.type === "text" ? p.name || "text" : p.type)}</span><span class="tf-dim">${pad(p.x, 3)},${pad(p.y, 3)}</span><span class="tf-dim">${Math.round(p.w)}×${Math.round(p.h)}</span><span class="${pr >= 1 ? "tf-c-ok" : "tf-c-acc"}">${bar}</span></div>`;
+          html += `<div class="gu-log-row"><span class="gu-dim">0x${Math.floor(rand(i + 31) * 0xffff).toString(16).padStart(4, "0")}</span><span>${esc(p.type === "text" ? p.name || "text" : p.type)}</span><span class="gu-dim">${pad(p.x, 3)},${pad(p.y, 3)}</span><span class="gu-dim">${Math.round(p.w)}×${Math.round(p.h)}</span><span class="${pr >= 1 ? "gu-c-ok" : "gu-c-acc"}">${bar}</span></div>`;
         }
         log.innerHTML = html;
       }
@@ -375,9 +375,9 @@ export function form(target, options = {}) {
           const status = t < 320 * k ? "READING" : revealed < n ? "WRITING" : "APPLYING";
           const tps = Math.round(140 + rand(Math.floor(t / 180)) * 40);
           code.innerHTML =
-            `<div class="tf-panel-head">MOTION.CSS // ${pad(done, 2)} RECIPES · ${tokensDone}/${tokens} TOKENS</div><div class="tf-panel-rule"></div>` +
-            `<pre>${shown.slice(-(o.texts === "below" ? rows : 999)).map(codeLine).join("")}<span class="tf-caret"></span></pre>` +
-            `<div class="tf-status">${tps} TOK/S · ${shown.length} LN · ${lines.filter((l) => l === "}").length} RECIPES · <span class="${status === "APPLYING" ? "tf-c-acc" : ""}">${status}</span></div>`;
+            `<div class="gu-panel-head">MOTION.CSS // ${pad(done, 2)} RECIPES · ${tokensDone}/${tokens} TOKENS</div><div class="gu-panel-rule"></div>` +
+            `<pre>${shown.slice(-(o.texts === "below" ? rows : 999)).map(codeLine).join("")}<span class="gu-caret"></span></pre>` +
+            `<div class="gu-status">${tps} TOK/S · ${shown.length} LN · ${lines.filter((l) => l === "}").length} RECIPES · <span class="${status === "APPLYING" ? "gu-c-acc" : ""}">${status}</span></div>`;
         }
       }
 
@@ -405,8 +405,8 @@ export function form(target, options = {}) {
 }
 
 /**
- * Attribute API. Plays each `[data-tf-form]` element once it scrolls into view.
- *   <div data-tf-form="texts" data-tf-delay="200">…</div>
+ * Attribute API. Plays each `[data-gu-form]` element once it scrolls into view.
+ *   <div data-gu-form="texts" data-gu-delay="200">…</div>
  */
 export function auto(root = document) {
   const io = new IntersectionObserver(
@@ -415,13 +415,13 @@ export function auto(root = document) {
         if (!e.isIntersecting) continue;
         io.unobserve(e.target);
         const d = e.target.dataset;
-        form(e.target, { mode: d.tfForm === "texts" ? "texts" : "build", delay: Number(d.tfDelay) || 0 });
+        form(e.target, { mode: d.guForm === "texts" ? "texts" : "build", delay: Number(d.guDelay) || 0 });
       }
     },
     { threshold: 0.35 },
   );
-  root.querySelectorAll("[data-tf-form]").forEach((n) => {
-    n.classList.add("tf-root", "tf-building"); // hidden until it plays
+  root.querySelectorAll("[data-gu-form]").forEach((n) => {
+    n.classList.add("gu-root", "gu-building"); // hidden until it plays
     io.observe(n);
   });
   return () => io.disconnect();

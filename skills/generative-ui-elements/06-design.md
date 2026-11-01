@@ -1,6 +1,6 @@
 # Design language
 
-The formation is half the effect; the UI it builds is the other half. These are the choices that made tween's version work, and the ones that were tried and thrown out.
+The formation is half the effect; the UI it builds is the other half. These are the choices behind this version, and the ones that were tried and thrown out.
 
 ## Ink (dark, default) and paper (light)
 

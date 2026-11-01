@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="ugu-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>tween · UI formation</title>
+    <title>Generative UI Elements</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./tween-form.css" />
+    <link rel="stylesheet" href="./generative-ui.css" />
     <style>
       :root,
       [data-theme="dark"] {
@@ -176,7 +176,7 @@
   </head>
   <body>
     <header>
-      <div class="logo serif">tween<span>.</span></div>
+      <div class="logo serif">Generative UI<span>.</span></div>
       <div class="controls mono">
         <button id="build">Build</button>
         <button id="texts">Build + texts</button>
@@ -221,8 +221,8 @@
     </div>
 
     <script type="module">
-      import { form } from "./tween-form.js";
-      import { canRecord, exportVideo } from "./tween-record.js";
+      import { form } from "./generative-ui.js";
+      import { canRecord, exportVideo } from "./generative-ui-record.js";
 
       const cards = [document.getElementById("event"), document.getElementById("weather")];
       const recipes = [
@@ -259,7 +259,7 @@
           frame: document.getElementById("stage"),
           size: { w: 1920, h: 1080 },
           play: (delay) => play("build", delay),
-          filename: "tween-formation-16x9",
+          filename: "generative-ui-16x9",
         }).catch((e) => alert(e.message));
     </script>
   </body>

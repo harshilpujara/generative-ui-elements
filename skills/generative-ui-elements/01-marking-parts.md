@@ -35,7 +35,7 @@ Without marks the runtime walks the DOM and takes:
 - inline `svg` → `svg`
 - `img`, `video`, `canvas`, and any element with a background, background image or border (smaller than 60% of the element) → `frame`
 
-Add `data-tf-skip` to leave a subtree out (a decorative layer, a live video).
+Add `data-gu-skip` to leave a subtree out (a decorative layer, a live video).
 
 Detection is good for trying it on existing UI. For something you'll ship or film, mark the parts: you choose the order and the names that show in the log.
 
